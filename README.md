@@ -10,6 +10,21 @@ The code is written in motoko and developed in The DFINITY command-line executio
   # second argument is passed to internal cap library (used when creating cap root canister)
   dfx deploy --network $NETWORK swap --argument="(principal \"$(dfx identity get-principal)\", principal \"$(dfx canister --network $NETWORK id swap)\")"
 ```
+### For create token DIP20  
+  Make sure you already run these:
+```bash
+  dfx start --background
+  dfx canister create --all
+  dfx build
+``` 
+Check getCallerPrincipal() in token UI canister to ensure your principal owner
+ 
+Install code for token canister
+```bash
+  dfx canister install token0 --argument="(\"logoImg\", \"DFinance Coin\", \"DFC\", 8, 10000000000000000, principal \"2vxsx-fae\", 10000)"
+
+  dfx canister install token1 --argument="(\"logoImg\", \"A Coin\", \"AAA\", 8, 10000000000000000, principal \"2vxsx-fae\", 10000)"
+``` 
 
 ### Verify SNS Upgrade proposal  
 
