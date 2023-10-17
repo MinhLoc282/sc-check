@@ -1,0 +1,25 @@
+{
+  "canisters": {
+	"swap": {
+	  "main": "swap/src/swap.mo"
+	},
+  "token0": {
+    "main": "token/token.mo"
+  },
+  "token1": {
+    "main": "token/token.mo"
+  }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
