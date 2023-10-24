@@ -1,14 +1,26 @@
 {
   "canisters": {
-	"swap": {
-	  "main": "swap/src/swap.mo"
-	},
-  "token0": {
-    "main": "token/token.mo"
-  },
-  "token1": {
-    "main": "token/token.mo"
-  }
+    "swap": {
+      "main": "canisters/swap/src/swap.mo"
+    },
+    "token0": {
+      "main": "canisters/token/token.mo"
+    },
+    "token1": {
+      "main": "canisters/token/token.mo"
+    },
+    "assets": {
+      "dependencies": [
+        "swap", "token0", "token1"
+      ],
+      "frontend": {
+        "entrypoint": "dist/index.html"
+      },
+      "source": [
+        "dist/"
+      ],
+      "type": "assets"
+    }
   },
   "defaults": {
     "build": {
@@ -19,6 +31,12 @@
     "local": {
       "bind": "127.0.0.1:4943",
       "type": "ephemeral"
+    },
+    "ic": {
+      "providers": [
+        "https://mainnet.dfinity.network"
+      ],
+      "type": "persistent"
     }
   },
   "version": 1

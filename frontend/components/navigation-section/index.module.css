@@ -1,0 +1,36 @@
+.NavigationSection {
+  width: 100%;
+}
+
+.NavigationInnerContainer {
+  display: flex;
+  justify-content: center;
+
+  max-width: 164px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4px;
+
+  background: #111936;
+  border-radius: 15px;
+}
+
+.NavigationInnerContainer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0 15px;
+  height: 45px;
+  width: 82px;
+
+  text-decoration: none;
+  color: #8492c4;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.NavigationInnerContainer .Active {
+  color: #ffffff;
+  background: #212946;
+}

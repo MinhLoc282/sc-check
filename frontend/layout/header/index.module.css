@@ -1,0 +1,15 @@
+.AuthSection {
+  width: 100%;
+  padding: 1em;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: right;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.AuthSection button {
+  font-weight: 600;
+}
