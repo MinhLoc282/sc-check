@@ -1,10 +1,9 @@
 import React, {
-  createContext, useContext, useMemo,
+  createContext, useContext, useMemo, useState, useEffect,
 } from 'react';
 
 import PropTypes from 'prop-types';
-
-import { useCanister } from '@connect2ic/react';
+import { useAuth } from './use-auth-client';
 
 const SwapContext = createContext({
   getUserICRC1SubAccount: async () => {},
@@ -37,55 +36,55 @@ const SwapContext = createContext({
 });
 
 export function SwapProvider({ children }) {
-  const [swap] = useCanister('swap');
+  const { swapActor } = useAuth();
 
   const getUserICRC1SubAccount = async (user) => {
-    const res = await swap.getUserICRC1SubAccount(user);
+    const res = await swapActor.getUserICRC1SubAccount(user);
     return res;
   };
 
   const getPair = async (token0, token1) => {
-    const res = await swap.getPair(token0, token1);
+    const res = await swapActor.getPair(token0, token1);
     return res;
   };
 
   const getAllPairs = async () => {
-    const res = await swap.getAllPairs();
+    const res = await swapActor.getAllPairs();
     return res;
   };
 
   const getNumPairs = async () => {
-    const res = await swap.getNumPairs();
+    const res = await swapActor.getNumPairs();
     return res;
   };
 
   const getSupportedTokenList = async () => {
-    const res = await swap.getSupportedTokenList();
+    const res = await swapActor.getSupportedTokenList();
     return res;
   };
 
   const getUserLPBalances = async (user) => {
-    const res = await swap.getUserLPBalances(user);
+    const res = await swapActor.getUserLPBalances(user);
     return res;
   };
 
   const getUserInfo = async (user) => {
-    const res = await swap.getUserInfo(user);
+    const res = await swapActor.getUserInfo(user);
     return res;
   };
 
   const getSwapInfo = async () => {
-    const res = await swap.getSwapInfo();
+    const res = await swapActor.getSwapInfo();
     return res;
   };
 
   const addToken = async (tokenId, tokenType) => {
-    const res = await swap.addToken(tokenId, tokenType);
+    const res = await swapActor.addToken(tokenId, tokenType);
     return res;
   };
 
   const createPair = async (token0, token1) => {
-    const res = await swap.createPair(token0, token1);
+    const res = await swapActor.createPair(token0, token1);
     return res;
   };
 
@@ -98,7 +97,7 @@ export function SwapProvider({ children }) {
     amount1Min,
     deadline,
   ) => {
-    const res = await swap.addLiquidity(
+    const res = await swapActor.addLiquidity(
       token0,
       token1,
       amount0Desired,
@@ -111,83 +110,100 @@ export function SwapProvider({ children }) {
   };
 
   const removeLiquidity = async (token0, token1, lpAmount, to, deadline) => {
-    const res = await swap.removeLiquidity(token0, token1, lpAmount, to, deadline);
+    const res = await swapActor.removeLiquidity(token0, token1, lpAmount, to, deadline);
     return res;
   };
 
   const deposit = async (tokenId, value) => {
-    const res = await swap.deposit(tokenId, value);
+    const res = await swapActor.deposit(tokenId, value);
     return res;
   };
 
   const depositTo = async (tokenId, to, value) => {
-    const res = await swap.depositTo(tokenId, to, value);
+    const res = await swapActor.depositTo(tokenId, to, value);
     return res;
   };
 
   const withdraw = async (tokenId, value) => {
-    const res = await swap.withdraw(tokenId, value);
+    const res = await swapActor.withdraw(tokenId, value);
     return res;
   };
 
   const withdrawTo = async (tokenId, to, value) => {
-    const res = await swap.withdrawTo(tokenId, to, value);
+    const res = await swapActor.withdrawTo(tokenId, to, value);
     return res;
   };
 
   const swapExactTokensForTokens = async (amountIn, amountOutMin, path, to, deadline) => {
-    const res = await swap.swapExactTokensForTokens(amountIn, amountOutMin, path, to, deadline);
+    const res = await swapActor.swapExactTokensForTokens(
+      amountIn,
+      amountOutMin,
+      path,
+      to,
+      deadline,
+    );
     return res;
   };
 
   const swapTokensForExactTokens = async (amountOut, amountInMax, path, to, deadline) => {
-    const res = await swap.swapTokensForExactTokens(amountOut, amountInMax, path, to, deadline);
+    const res = await swapActor.swapTokensForExactTokens(
+      amountOut,
+      amountInMax,
+      path,
+      to,
+      deadline,
+    );
     return res;
   };
 
   // Other functions related to tokens
   const transfer = async (tokenId, to, value) => {
-    const res = await swap.transfer(tokenId, to, value);
+    const res = await swapActor.transfer(tokenId, to, value);
     return res;
   };
 
   const transferFrom = async (tokenId, from, to, value) => {
-    const res = await swap.transferFrom(tokenId, from, to, value);
+    const res = await swapActor.transferFrom(tokenId, from, to, value);
     return res;
   };
 
   const approve = async (tokenId, spender, value) => {
-    const res = await swap.approve(tokenId, spender, value);
+    const res = await swapActor.approve(tokenId, spender, value);
     return res;
   };
 
   const balanceOf = async (tokenId, who) => {
-    const res = await swap.balanceOf(tokenId, who);
+    const res = await swapActor.balanceOf(tokenId, who);
     return res;
   };
 
   const allowance = async (tokenId, owner, spender) => {
-    const res = await swap.allowance(tokenId, owner, spender);
+    const res = await swapActor.allowance(tokenId, owner, spender);
     return res;
   };
 
   const totalSupply = async (tokenId) => {
-    const res = await swap.totalSupply(tokenId);
+    const res = await swapActor.totalSupply(tokenId);
     return res;
   };
 
   const name = async (tokenId) => {
-    const res = await swap.name(tokenId);
+    const res = await swapActor.name(tokenId);
     return res;
   };
 
   const decimals = async (tokenId) => {
-    const res = await swap.decimals(tokenId);
+    const res = await swapActor.decimals(tokenId);
     return res;
   };
 
   const symbol = async (tokenId) => {
-    const res = await swap.symbol(tokenId);
+    const res = await swapActor.symbol(tokenId);
+    return res;
+  };
+
+  const getCallerPrincipal = async (tokenCanister) => {
+    const res = await tokenCanister.getCallerPrincipal();
     return res;
   };
 
@@ -219,7 +235,8 @@ export function SwapProvider({ children }) {
     name,
     decimals,
     symbol,
-  }), []);
+    getCallerPrincipal,
+  }), [swapActor]);
 
   return (
     <SwapContext.Provider

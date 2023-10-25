@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import styles from './index.module.css';
 
 function PairCard({ pair }) {
+  const renderBigIntAsString = (bigIntValue) => bigIntValue.toString();
+
   return (
     <div className={styles.PairCard}>
       <div>
@@ -11,11 +13,11 @@ function PairCard({ pair }) {
       </div>
 
       <div>
-        {pair.kLast}
+        {renderBigIntAsString(pair.kLast)}
       </div>
 
       <div>
-        {pair.totalSupply}
+        {renderBigIntAsString(pair.kLast)}
       </div>
     </div>
   );
@@ -26,14 +28,20 @@ PairCard.propTypes = {
     id: PropTypes.string.isRequired,
     token0: PropTypes.string.isRequired,
     token1: PropTypes.string.isRequired,
-    creator: PropTypes.string.isRequired,
-    reserve0: PropTypes.number.isRequired,
-    reserve1: PropTypes.number.isRequired,
-    price0CumulativeLast: PropTypes.number.isRequired,
-    price1CumulativeLast: PropTypes.number.isRequired,
-    kLast: PropTypes.number.isRequired,
-    blockTimestampLast: PropTypes.number.isRequired,
-    totalSupply: PropTypes.number.isRequired,
+    creator: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        _arr: PropTypes.instanceOf(Uint8Array).isRequired,
+        _isPrincipal: PropTypes.bool.isRequired,
+      }),
+    ]).isRequired,
+    reserve0: PropTypes.any.isRequired,
+    reserve1: PropTypes.any.isRequired,
+    price0CumulativeLast: PropTypes.any.isRequired,
+    price1CumulativeLast: PropTypes.any.isRequired,
+    kLast: PropTypes.any.isRequired,
+    blockTimestampLast: PropTypes.any.isRequired,
+    totalSupply: PropTypes.any.isRequired,
     lptoken: PropTypes.string.isRequired,
   }).isRequired,
 };
