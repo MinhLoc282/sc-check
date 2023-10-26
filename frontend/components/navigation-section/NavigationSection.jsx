@@ -13,7 +13,7 @@ function NavigationContainer() {
           Swap
         </Link>
 
-        <Link to="/swap/liquidity" className={location.pathname === '/swap/liquidity' ? styles.Active : ''}>
+        <Link to="/swap/liquidity" className={location.pathname.includes('liquidity') ? styles.Active : ''}>
           Liquidity
         </Link>
       </section>

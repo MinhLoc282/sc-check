@@ -1,11 +1,19 @@
 .PageContainer {
   min-height: calc(100vh - 80px);
   background: linear-gradient(to bottom, rgb(44, 37, 73) 0%, rgb(17, 25, 54) 60%,  rgb(17, 25, 54) 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.LiquidityOuterContainer {
+  width: 100%;
+  max-width: 1400px;
+  margin: auto;
 }
 
 .LiquidityContainer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   margin-top: 32px;
   gap: 20px;
 }
@@ -17,7 +25,7 @@
 
   padding: 24px;
   height: 144px;
-  width: 40%;
+  width: 50%;
 
   box-shadow: none;
   background-image: none;

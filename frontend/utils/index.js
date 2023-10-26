@@ -8,7 +8,7 @@ export const calculateAmount0Desired = (
   const amount0Desired = (L * (Math.sqrt(priceHigher) - Math.sqrt(currPrice)))
   / (Math.sqrt(currPrice) * Math.sqrt(priceHigher));
 
-  return amount0Desired;
+  return Math.round(amount0Desired);
 };
 
 export const calculateAmount1Desired = (
@@ -21,5 +21,5 @@ export const calculateAmount1Desired = (
             / (Math.sqrt(priceHigher) - Math.sqrt(currPrice));
   const amount1Desired = L * (Math.sqrt(currPrice) - Math.sqrt(priceLower));
 
-  return amount1Desired;
+  return Math.round(amount1Desired);
 };

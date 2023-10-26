@@ -1,23 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import styles from './index.module.css';
+import { useAuth } from '../../hooks/use-auth-client';
 
 function PairCard({ pair }) {
+  const { swapActor } = useAuth();
+  const [tokenList, setTokenList] = useState([]);
+  const [tvl, setTvl] = useState();
+
   const renderBigIntAsString = (bigIntValue) => bigIntValue.toString();
+
+  const calculateTVL = (token0Id, token1Id) => {
+    if (tokenList.length > 0) {
+      const token0 = tokenList.find((token) => token.id === token0Id);
+      const token1 = tokenList.find((token) => token.id === token1Id);
+
+      if (token0 && token1) {
+        const TVL = token0.totalSupply + token1.totalSupply;
+        return Number(TVL);
+      }
+    }
+
+    return undefined;
+  };
+
+  const principalToSymbol = (principal) => {
+    if (tokenList.length > 0) {
+      const token = tokenList.find((t) => t.id === principal);
+      return token.symbol;
+    }
+
+    return undefined;
+  };
+
+  useEffect(() => {
+    const handleGetTokenList = async () => {
+      const res = await swapActor.getSupportedTokenList();
+      setTokenList(res);
+    };
+
+    if (swapActor) {
+      handleGetTokenList();
+    }
+  }, [swapActor]);
+
+  useEffect(() => {
+    setTvl(calculateTVL(pair.token0, pair.token1));
+  }, [tokenList]);
 
   return (
     <div className={styles.PairCard}>
-      <div>
-        {pair.id}
+      <div className={styles.InfoContainer}>
+        {principalToSymbol(pair.token0)}
+        /
+        {principalToSymbol(pair.token1)}
       </div>
 
-      <div>
-        {renderBigIntAsString(pair.kLast)}
-      </div>
+      <div className={styles.VolumeContainer}>
+        <div className={styles.VolumeInnerContainer}>
+          <div>TVL</div>
 
-      <div>
-        {renderBigIntAsString(pair.kLast)}
+          <span>
+            {renderBigIntAsString(pair.totalSupply)}
+          </span>
+        </div>
+
+        <div className={styles.VolumeInnerContainer}>
+          <div>Total Volume</div>
+
+          <span>
+            {tvl}
+          </span>
+        </div>
       </div>
     </div>
   );

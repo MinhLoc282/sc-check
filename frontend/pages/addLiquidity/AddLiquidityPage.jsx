@@ -16,8 +16,39 @@ import { calculateAmount0Desired, calculateAmount1Desired } from '../../utils';
 import styles from './index.module.css';
 
 function AddLiquidityPage() {
-  const {swapActor} = useAuth()
+  const { swapActor } = useAuth();
   const navigation = useNavigate();
+  const validation = useFormik({
+    initialValues: {
+      token0: '',
+      token1: '',
+      amount0Desired: '',
+      amount1Desired: '',
+    },
+
+    validationSchema: Yup.object().shape({
+      token0: Yup.string().required('Token0 is required'),
+      token1: Yup.string().required('Token1 is required'),
+      amount0Desired: Yup.string().required('Amount0 Desired is required'),
+      amount1Desired: Yup.string().required('Amount1 Desired is required'),
+    }),
+
+    onSubmit: async (values) => {
+      const timestamp = Math.floor(new Date().getTime() * 10000000000);
+
+      const res = await swapActor.addLiquidity(
+        Principal.fromText(values.token0),
+        Principal.fromText(values.token1),
+        values.amount0Desired,
+        values.amount1Desired,
+        0,
+        0,
+        timestamp,
+      );
+
+      console.log(res);
+    },
+  });
 
   const [price, setPrice] = useState();
   const [priceMin, setPriceMin] = useState();
@@ -26,6 +57,8 @@ function AddLiquidityPage() {
   const [selectedToken1Name, setSelectedToken1Name] = useState('');
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [selectedTokenIdentifier, setSelectedTokenIdentifier] = useState('');
+  const [amount1Desired, setAmount1Desired] = useState(validation.values.amount1Desired);
+  const [amount0Desired, setAmount0Desired] = useState(validation.values.amount0Desired);
 
   const openTokenModal = (token) => {
     setSelectedTokenIdentifier(token);
@@ -74,47 +107,23 @@ function AddLiquidityPage() {
   };
 
   const getPriceFromPair = async (token0, token1) => {
-    const pairinfo = await swapActor.getPair(Principal.fromText(token0), Principal.fromText(token1));
-    const res0 = pairinfo.reserve0 * (10 ** 18);
-    const rls = (1 * res0) / pairinfo.reserve1 / (10 ** 18);
+    const pairinfo = await swapActor.getPair(
+      Principal.fromText(token0),
+      Principal.fromText(token1),
+    );
+
+    const res0 = Number(pairinfo[0].reserve0) * (10 ** 18);
+    const rls = (1 * res0) / Number(pairinfo[0].reserve1) / (10 ** 18);
     setPrice(parseFloat(rls));
   };
 
-  const validation = useFormik({
-    initialValues: {
-      token0: '',
-      token1: '',
-      amount0Desired: '',
-      amount1Desired: '',
-    },
-
-    validationSchema: Yup.object().shape({
-      token0: Yup.string().required('Token0 is required'),
-      token1: Yup.string().required('Token1 is required'),
-      amount0Desired: Yup.string().required('Amount0 Desired is required'),
-      amount1Desired: Yup.string().required('Amount1 Desired is required'),
-    }),
-
-    onSubmit: (values) => {
-      const timestamp = Math.floor(new Date().getTime() / 1000) + 600;
-
-      swapActor.addLiquidity(
-        Principal.fromText(values.token0),
-        Principal.fromText(values.token1),
-        values.amount0Desired,
-        values.amount1Desired,
-        0,
-        0,
-        timestamp,
-      );
-    },
-  });
-
   useEffect(() => {
-    if (!Number.isNaN(validation.values.amount0Desired)
-    && !Number.isNaN(price)
-    && !Number.isNaN(priceMin)
-    && !Number.isNaN(priceMax)) {
+    if (
+      !Number.isNaN(validation.values.amount0Desired)
+      && !Number.isNaN(price)
+      && !Number.isNaN(priceMin)
+      && !Number.isNaN(priceMax)
+    ) {
       const newAmount1Desired = calculateAmount1Desired(
         validation.values.amount0Desired,
         price,
@@ -122,15 +131,20 @@ function AddLiquidityPage() {
         priceMax,
       );
 
-      validation.setFieldValue('amount1Desired', newAmount1Desired);
+      if (newAmount1Desired !== amount1Desired) {
+        setAmount1Desired(newAmount1Desired);
+        validation.setFieldValue('amount1Desired', newAmount1Desired);
+      }
     }
   }, [validation.values.amount0Desired, price, priceMin, priceMax]);
 
   useEffect(() => {
-    if (!Number.isNaN(validation.values.amount1Desired)
-    && !Number.isNaN(price)
-    && !Number.isNaN(priceMin)
-    && !Number.isNaN(priceMax)) {
+    if (
+      !Number.isNaN(validation.values.amount1Desired)
+      && !Number.isNaN(price)
+      && !Number.isNaN(priceMin)
+      && !Number.isNaN(priceMax)
+    ) {
       const newAmount0Desired = calculateAmount0Desired(
         validation.values.amount1Desired,
         price,
@@ -138,15 +152,16 @@ function AddLiquidityPage() {
         priceMax,
       );
 
-      validation.setFieldValue('amount0Desired', newAmount0Desired);
+      if (newAmount0Desired !== amount0Desired) {
+        setAmount0Desired(newAmount0Desired);
+        validation.setFieldValue('amount0Desired', newAmount0Desired);
+      }
     }
   }, [validation.values.amount1Desired, price, priceMin, priceMax]);
 
   useEffect(() => {
     if (validation.values.token0 && validation.values.token1) {
       getPriceFromPair(validation.values.token0, validation.values.token1);
-      setPriceMin(price - price / 2);
-      setPriceMax(price * 2);
     }
   }, [validation.values.token0, validation.values.token1]);
 
@@ -171,36 +186,6 @@ function AddLiquidityPage() {
             <div className={styles.PairSelection}>
               <h2>Select Pair</h2>
               <div className={styles.TokenContainer}>
-                {/* <select
-                  id="token0"
-                  name="token0"
-                  onChange={handleToken0Change}
-                  onBlur={validation.handleBlur}
-                  value={selectedToken0Name}
-                >
-                  <option value="" disabled hidden>Select a token</option>
-                  {Object.keys(tokenMap).map((tokenName) => (
-                    <option key={tokenName} value={tokenName}>
-                      {tokenName}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  id="token1"
-                  name="token1"
-                  onChange={handleToken1Change}
-                  onBlur={validation.handleBlur}
-                  value={selectedToken1Name}
-                >
-                  <option value="" disabled hidden>Select a token</option>
-                  {Object.keys(tokenMap).map((tokenName) => (
-                    <option key={tokenName} value={tokenName}>
-                      {tokenName}
-                    </option>
-                  ))}
-                </select> */}
-
                 <button type="button" onClick={() => openTokenModal('0')}>
                   {selectedToken0Name || 'Select Token 0'}
                 </button>

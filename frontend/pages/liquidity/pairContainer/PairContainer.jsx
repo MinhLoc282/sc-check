@@ -19,8 +19,10 @@ function PairContainer() {
       setPairs(res);
     };
 
-    handleGetPairs();
-  }, []);
+    if (swapActor) {
+      handleGetPairs();
+    }
+  }, [swapActor]);
 
   return (
     <div className={styles.PairContainer}>
