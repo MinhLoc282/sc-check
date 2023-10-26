@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 
-import useSwap from '../../../hooks/useSwap';
-
 import PairCard from '../../../components/pairCard/PairCard';
+
+import { useAuth } from '../../../hooks/use-auth-client';
 
 import styles from './index.module.css';
 
 function PairContainer() {
   const {
-    getAllPairs,
-  } = useSwap();
+    swapActor,
+  } = useAuth();
 
   const [pairs, setPairs] = useState([]);
 
   useEffect(() => {
     const handleGetPairs = async () => {
-      const res = await getAllPairs();
+      const res = await swapActor.getAllPairs();
       setPairs(res);
     };
 

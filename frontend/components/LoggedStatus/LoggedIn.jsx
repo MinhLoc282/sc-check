@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
 import { useAuth } from '../../hooks/use-auth-client';
-import useSwap from '../../hooks/useSwap';
 
 import styles from './index.module.css';
 
 function LoggedIn() {
   const {
-    principal, logout,
+    principal, logout, swapActor,
   } = useAuth();
-  const { getUserICRC1SubAccount } = useSwap();
 
   const [accountId, setAccountId] = useState();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -20,7 +18,7 @@ function LoggedIn() {
 
   useEffect(() => {
     const handleGetUserICRC1SubAccount = async (user) => {
-      const res = await getUserICRC1SubAccount(user);
+      const res = await swapActor.getUserICRC1SubAccount(user);
       setAccountId(res);
     };
 

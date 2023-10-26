@@ -3,7 +3,7 @@ import Modal from 'react-modal';
 
 import PropTypes from 'prop-types';
 
-import useSwap from '../../../hooks/useSwap';
+import { useAuth } from '../../../hooks/use-auth-client';
 
 import styles from './index.module.css';
 
@@ -30,7 +30,7 @@ function SelectTokenModal({
   handleToken1Change,
   selectedTokenIdentifier,
 }) {
-  const { getSupportedTokenList } = useSwap();
+  const { swapActor } = useAuth();
 
   const [tokenList, setTokenList] = useState([]);
 
@@ -46,12 +46,14 @@ function SelectTokenModal({
 
   useEffect(() => {
     const handleGetSupportedTokenList = async () => {
-      const res = await getSupportedTokenList();
+      const res = await swapActor.getSupportedTokenList();
       setTokenList(res);
     };
 
-    handleGetSupportedTokenList();
-  }, []);
+    if (swapActor) {
+      handleGetSupportedTokenList();
+    }
+  }, [swapActor]);
 
   return (
     <Modal

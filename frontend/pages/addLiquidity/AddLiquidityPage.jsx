@@ -6,7 +6,7 @@ import * as Yup from 'yup';
 
 import { Principal } from '@dfinity/principal';
 
-import useSwap from '../../hooks/useSwap';
+import { useAuth } from '../../hooks/use-auth-client';
 
 import NavigationContainer from '../../components/navigation-section/NavigationSection';
 import SelectTokenModal from './SelectTokenModal/SelectTokenModal';
@@ -16,7 +16,7 @@ import { calculateAmount0Desired, calculateAmount1Desired } from '../../utils';
 import styles from './index.module.css';
 
 function AddLiquidityPage() {
-  const { getPair, addLiquidity } = useSwap();
+  const {swapActor} = useAuth()
   const navigation = useNavigate();
 
   const [price, setPrice] = useState();
@@ -74,7 +74,7 @@ function AddLiquidityPage() {
   };
 
   const getPriceFromPair = async (token0, token1) => {
-    const pairinfo = await getPair(Principal.fromText(token0), Principal.fromText(token1));
+    const pairinfo = await swapActor.getPair(Principal.fromText(token0), Principal.fromText(token1));
     const res0 = pairinfo.reserve0 * (10 ** 18);
     const rls = (1 * res0) / pairinfo.reserve1 / (10 ** 18);
     setPrice(parseFloat(rls));
@@ -98,7 +98,7 @@ function AddLiquidityPage() {
     onSubmit: (values) => {
       const timestamp = Math.floor(new Date().getTime() / 1000) + 600;
 
-      addLiquidity(
+      swapActor.addLiquidity(
         Principal.fromText(values.token0),
         Principal.fromText(values.token1),
         values.amount0Desired,

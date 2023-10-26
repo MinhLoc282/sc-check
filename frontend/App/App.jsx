@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 
 import { AuthProvider } from '../hooks/use-auth-client';
-import { SwapProvider } from '../hooks/useSwap';
 
 import { LOCATION } from '../constants';
 
@@ -39,9 +38,7 @@ function App() {
 export default function MyApp() {
   return (
     <AuthProvider>
-      <SwapProvider>
-        <App />
-      </SwapProvider>
+      <App />
     </AuthProvider>
   );
 }
