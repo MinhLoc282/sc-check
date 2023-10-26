@@ -8,22 +8,23 @@ import { Principal } from '@dfinity/principal';
 
 import { useAuth } from '../../hooks/use-auth-client';
 
-import NavigationContainer from '../../components/navigation-section/NavigationSection';
+import NavigationContainer from '../../components/NavigationSection/NavigationSection';
 import SelectTokenModal from './SelectTokenModal/SelectTokenModal';
 
-import { calculateAmount0Desired, calculateAmount1Desired } from '../../utils';
+import { calculateAmount0Desired, calculateAmount1Desired, getPriceFromPair } from '../../utils';
 
 import styles from './index.module.css';
+import AddLiquidityModal from './AddLiquidityModal/AddLiquidityModal';
 
 function AddLiquidityPage() {
-  const { swapActor } = useAuth();
+  const { swapActor, principal } = useAuth();
   const navigation = useNavigate();
   const validation = useFormik({
     initialValues: {
       token0: '',
       token1: '',
-      amount0Desired: '',
-      amount1Desired: '',
+      amount0Desired: 0,
+      amount1Desired: 0,
     },
 
     validationSchema: Yup.object().shape({
@@ -34,29 +35,22 @@ function AddLiquidityPage() {
     }),
 
     onSubmit: async (values) => {
-      const timestamp = Math.floor(new Date().getTime() * 10000000000);
+      setFormValues(values);
 
-      const res = await swapActor.addLiquidity(
-        Principal.fromText(values.token0),
-        Principal.fromText(values.token1),
-        values.amount0Desired,
-        values.amount1Desired,
-        0,
-        0,
-        timestamp,
-      );
-
-      console.log(res);
+      openAddLiquidityModal();
     },
   });
 
+  const [userBalances, setUserBalances] = useState([]);
   const [price, setPrice] = useState();
   const [priceMin, setPriceMin] = useState();
   const [priceMax, setPriceMax] = useState();
   const [selectedToken0Name, setSelectedToken0Name] = useState('');
   const [selectedToken1Name, setSelectedToken1Name] = useState('');
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [isAddLiquidityModalOpen, setIsAddLiquidityModalOpen] = useState(false);
   const [selectedTokenIdentifier, setSelectedTokenIdentifier] = useState('');
+  const [formValues, setFormValues] = useState(validation.values);
   const [amount1Desired, setAmount1Desired] = useState(validation.values.amount1Desired);
   const [amount0Desired, setAmount0Desired] = useState(validation.values.amount0Desired);
 
@@ -67,6 +61,14 @@ function AddLiquidityPage() {
 
   const closeTokenModal = () => {
     setIsTokenModalOpen(false);
+  };
+
+  const openAddLiquidityModal = () => {
+    setIsAddLiquidityModalOpen(true);
+  };
+
+  const closeAddLiquidityModal = () => {
+    setIsAddLiquidityModalOpen(false);
   };
 
   const handleGoBack = () => {
@@ -104,17 +106,6 @@ function AddLiquidityPage() {
       setSelectedToken1Name('');
       validation.setFieldValue('token0', o.id);
     }
-  };
-
-  const getPriceFromPair = async (token0, token1) => {
-    const pairinfo = await swapActor.getPair(
-      Principal.fromText(token0),
-      Principal.fromText(token1),
-    );
-
-    const res0 = Number(pairinfo[0].reserve0) * (10 ** 18);
-    const rls = (1 * res0) / Number(pairinfo[0].reserve1) / (10 ** 18);
-    setPrice(parseFloat(rls));
   };
 
   useEffect(() => {
@@ -160,8 +151,20 @@ function AddLiquidityPage() {
   }, [validation.values.amount1Desired, price, priceMin, priceMax]);
 
   useEffect(() => {
-    if (validation.values.token0 && validation.values.token1) {
-      getPriceFromPair(validation.values.token0, validation.values.token1);
+    const handleGetPriceFromPair = async () => {
+      if (validation.values.token0 && validation.values.token1) {
+        const res = await getPriceFromPair(
+          swapActor,
+          Principal.fromText(validation.values.token0),
+          Principal.fromText(validation.values.token1),
+        );
+
+        setPrice(res);
+      }
+    };
+
+    if (swapActor) {
+      handleGetPriceFromPair();
     }
   }, [validation.values.token0, validation.values.token1]);
 
@@ -169,6 +172,20 @@ function AddLiquidityPage() {
     setPriceMin(price - price / 2);
     setPriceMax(price * 2);
   }, [price]);
+
+  useEffect(() => {
+    const handleGetUserBalances = async () => {
+      const res = await swapActor.getUserBalances(principal);
+      const token0Balance = res.find((balance) => balance[0] === validation.values.token0);
+      const token1Balance = res.find((balance) => balance[0] === validation.values.token1);
+
+      setUserBalances([token0Balance[1], token1Balance[1]]);
+    };
+
+    if (swapActor && principal && validation.values.token0 && validation.values.token1) {
+      handleGetUserBalances();
+    }
+  }, [swapActor, principal, validation.values.token0, validation.values.token1]);
 
   return (
     <div className={styles.PageContainer}>
@@ -216,7 +233,11 @@ function AddLiquidityPage() {
                 {validation.touched.amount0Desired && validation.errors.amount0Desired && (
                 <div>{validation.errors.amount0Desired}</div>
                 )}
-                <p>Balance: 0</p>
+                <p>
+                  Balance:
+                  {' '}
+                  {userBalances[0] ? Number(userBalances[0]) : 0}
+                </p>
               </div>
 
               <div>
@@ -236,7 +257,11 @@ function AddLiquidityPage() {
                 {validation.touched.amount1Desired && validation.errors.amount1Desired && (
                 <div>{validation.errors.amount1Desired}</div>
                 )}
-                <p>Balance: 0</p>
+                <p>
+                  Balance:
+                  {' '}
+                  {userBalances[1] ? Number(userBalances[1]) : 0}
+                </p>
               </div>
             </div>
           </div>
@@ -287,6 +312,15 @@ function AddLiquidityPage() {
         handleToken0Change={handleToken0Change}
         handleToken1Change={handleToken1Change}
         selectedTokenIdentifier={selectedTokenIdentifier}
+      />
+
+      <AddLiquidityModal
+        isAddLiquidityModalOpen={isAddLiquidityModalOpen}
+        closeAddLiquidityModal={closeAddLiquidityModal}
+        formValues={formValues}
+        price={price}
+        priceMin={priceMin}
+        priceMax={priceMax}
       />
     </div>
   );

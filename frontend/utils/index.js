@@ -23,3 +23,14 @@ export const calculateAmount1Desired = (
 
   return Math.round(amount1Desired);
 };
+
+export const getPriceFromPair = async (swapActor, token0, token1) => {
+  const pairinfo = await swapActor.getPair(
+    token0,
+    token1,
+  );
+
+  const res0 = Number(pairinfo[0].reserve0) * (10 ** 18);
+  const rls = (1 * res0) / Number(pairinfo[0].reserve1) / (10 ** 18);
+  return (parseFloat(rls));
+};
