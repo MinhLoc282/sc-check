@@ -26,6 +26,13 @@ Install code for token canister
   dfx canister install token1 --argument="(\"logoImg\", \"A Coin\", \"AAA\", 8, 10000000000000000, principal \"2vxsx-fae\", 10000)"
 ``` 
 
+Identity canister
+```bash
+  dfx deps pull
+  dfx deps init --argument '(null)' internet-identity
+  dfx deps deploy
+``` 
+
 ### Verify SNS Upgrade proposal  
 
 All SNS Upgrade proposal will have git `commit-id` and binary build `hash`. Below steps will helps you verify the SNS upgrade proposal.
